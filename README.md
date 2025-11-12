@@ -1,37 +1,199 @@
-**This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Authentication Boilerplate
+
+A full-stack Next.js application with user authentication, protected routes, and a dashboard. Built with modern technologies including Prisma, NextAuth.js-inspired session management, and Tailwind CSS.
+
+## Features
+
+- **User Authentication**: Sign up and sign in functionality with secure password hashing
+- **Protected Routes**: Middleware-based route protection for authenticated and unauthenticated users
+- **Dashboard**: User dashboard with profile information and statistics
+- **Database Integration**: Prisma ORM with SQLite database (easily configurable for other databases)
+- **Responsive UI**: Modern, responsive design using Tailwind CSS
+- **TypeScript**: Full TypeScript support for type safety
+- **API Routes**: RESTful API endpoints for authentication
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Database**: Prisma with SQLite
+- **Styling**: Tailwind CSS
+- **Authentication**: Custom implementation with bcrypt and JWT-like cookies
+- **Language**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+
+- npm, yarn, pnpm, or bun
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/DarkVertana/Next-Boilerplate.git
+cd Next-Boilerplate
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+3. Set up the database:
+```bash
+npx prisma migrate dev
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+├── app/
+│   ├── api/auth/
+│   │   ├── signin/route.ts    # Sign in API endpoint
+│   │   └── signup/route.ts    # Sign up API endpoint
+│   ├── dashboard/
+│   │   └── page.tsx           # Protected dashboard page
+│   ├── login/
+│   │   └── page.tsx           # Login page
+│   ├── register/
+│   │   └── page.tsx           # Registration page
+│   ├── layout.tsx             # Root layout
+│   └── page.tsx               # Home page
+├── lib/
+│   └── auth.ts                # Authentication utilities
+├── prisma/
+│   ├── schema.prisma          # Database schema
+│   └── migrations/            # Database migrations
+├── middleware.ts              # Route protection middleware
+└── README.md
+```
 
-## Learn More
+## Authentication Flow
 
-To learn more about Next.js, take a look at the following resources:
+### Sign Up
+1. User submits registration form
+2. Password is hashed using bcrypt
+3. User data is stored in database
+4. User is redirected to login page
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Sign In
+1. User submits login form
+2. Credentials are validated against database
+3. If valid, user data is encoded and set as HTTP-only cookie
+4. User is redirected to dashboard
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Route Protection
+- **Middleware**: Automatically protects routes based on authentication status
+- **Dashboard (/dashboard)**: Requires authentication, redirects to /login if not authenticated
+- **Auth Pages (/login, /register)**: Redirects to /dashboard if already authenticated
 
-## Deploy on Vercel
+## API Endpoints
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### POST /api/auth/signup
+Register a new user.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-**
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "name": "User Name"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "User created successfully"
+}
+```
+
+### POST /api/auth/signin
+Authenticate a user.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Sign in successful"
+}
+```
+
+## Database Schema
+
+```prisma
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_SECRET="your-secret-key"
+```
+
+## Customization
+
+### Changing Database
+To use a different database (PostgreSQL, MySQL, etc.), update the `DATABASE_URL` in `.env` and modify `prisma/schema.prisma` accordingly.
+
+### Styling
+The application uses Tailwind CSS. Customize the design by modifying the classes in the component files or updating the `tailwind.config.js`.
+
+### Authentication Logic
+Extend the authentication logic in `lib/auth.ts` and the API routes in `app/api/auth/`.
+
+## Deployment
+
+### Vercel (Recommended)
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Set environment variables in Vercel dashboard
+4. Deploy
+
+### Other Platforms
+Ensure your deployment platform supports Node.js and can run the Prisma migrations.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
